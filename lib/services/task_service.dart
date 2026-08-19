@@ -9,58 +9,51 @@ class TaskService {
   static const String _tasksKey = 'tasks';
 
   static Future<List<Task>> loadTasks() async {
-    final preferences =
-        await SharedPreferences.getInstance();
+    final preferences = await SharedPreferences.getInstance();
 
-    final savedTasks =
-        preferences.getString(_tasksKey);
+    final savedTasks = preferences.getString(_tasksKey);
 
-    if (savedTasks == null ||
-        savedTasks.isEmpty) {
+    if (savedTasks == null || savedTasks.isEmpty) {
       return [];
     }
 
     try {
-      final List<dynamic> decoded =
-          jsonDecode(savedTasks);
+      final decoded = jsonDecode(savedTasks);
 
-      return decoded
-          .map(
-            (item) => Task.fromJson(
-              Map<String, dynamic>.from(
-                item,
-              ),
-            ),
-          )
-          .toList();
+      if (decoded is! List) {
+        return [];
+      }
+
+      final tasks = <Task>[];
+
+      for (final item in decoded) {
+        if (item is! Map) {
+          continue;
+        }
+
+        try {
+          tasks.add(Task.fromJson(Map<String, dynamic>.from(item)));
+        } catch (_) {
+          // Vienas sugadintas įrašas neturi
+          // paslėpti kitų galiojančių užduočių.
+        }
+      }
+
+      return tasks;
     } catch (_) {
       return [];
     }
   }
 
-  static Future<void> saveTasks(
-    List<Task> tasks,
-  ) async {
-    final preferences =
-        await SharedPreferences.getInstance();
+  static Future<void> saveTasks(List<Task> tasks) async {
+    final preferences = await SharedPreferences.getInstance();
 
-    final encoded = jsonEncode(
-      tasks
-          .map(
-            (task) => task.toJson(),
-          )
-          .toList(),
-    );
+    final encoded = jsonEncode(tasks.map((task) => task.toJson()).toList());
 
-    await preferences.setString(
-      _tasksKey,
-      encoded,
-    );
+    await preferences.setString(_tasksKey, encoded);
   }
 
-  static Future<void> addTask(
-    Task task,
-  ) async {
+  static Future<void> addTask(Task task) async {
     final tasks = await loadTasks();
 
     //
@@ -70,10 +63,8 @@ class TaskService {
     // Tai bus naudinga ir vėliau,
     // kai leisime redaguoti užduotis.
     //
-    final existingIndex =
-        tasks.indexWhere(
-      (existingTask) =>
-          existingTask.id == task.id,
+    final existingIndex = tasks.indexWhere(
+      (existingTask) => existingTask.id == task.id,
     );
 
     if (existingIndex >= 0) {
@@ -87,9 +78,7 @@ class TaskService {
     await _refreshGuardian(tasks);
   }
 
-  static Future<void> deleteTask(
-    String taskId,
-  ) async {
+  static Future<void> deleteTask(String taskId) async {
     final tasks = await loadTasks();
 
     Task? deletedTask;
@@ -101,9 +90,7 @@ class TaskService {
       }
     }
 
-    tasks.removeWhere(
-      (task) => task.id == taskId,
-    );
+    tasks.removeWhere((task) => task.id == taskId);
 
     await saveTasks(tasks);
 
@@ -113,19 +100,13 @@ class TaskService {
     // atšaukiame atskirai.
     //
     if (deletedTask != null) {
-      await GuardianNotificationService
-          .cancelForTask(
-        deletedTask,
-      );
+      await GuardianNotificationService.cancelForTask(deletedTask);
     }
 
     await _refreshGuardian(tasks);
   }
 
-  static Future<void> setCompleted(
-    String taskId,
-    bool completed,
-  ) async {
+  static Future<void> setCompleted(String taskId, bool completed) async {
     final tasks = await loadTasks();
 
     for (final task in tasks) {
@@ -147,14 +128,15 @@ class TaskService {
     await _refreshGuardian(tasks);
   }
 
-  static Future<void> _refreshGuardian(
-    List<Task> tasks,
-  ) async {
+  static Future<void> refreshGuardian() async {
+    final tasks = await loadTasks();
+
+    await _refreshGuardian(tasks);
+  }
+
+  static Future<void> _refreshGuardian(List<Task> tasks) async {
     try {
-      await GuardianNotificationService
-          .refresh(
-        tasks: tasks,
-      );
+      await GuardianNotificationService.refresh(tasks: tasks);
     } catch (_) {
       //
       // Guardian klaida neturi sutrukdyti

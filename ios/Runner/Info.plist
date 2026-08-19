@@ -24,6 +24,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Focus Assistant reads your calendar to understand your schedule and suggest suitable times for tasks.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Focus Assistant needs calendar access to understand your schedule and protect time for important tasks.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Focus Assistant may add calendar entries only when you explicitly request it.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Focus Assistant uses your location only while the app is open and only when you enable location context, so it can understand whether you are at an important place and suggest more suitable tasks.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -43,6 +43,7 @@ class Task {
 
   TaskSource source;
   TaskType type;
+  TaskPlaceRequirement placeRequirement;
 
   Task({
     required this.id,
@@ -61,6 +62,7 @@ class Task {
     this.steps = const [],
     this.source = TaskSource.app,
     this.type = TaskType.task,
+    this.placeRequirement = TaskPlaceRequirement.anywhere,
   });
 
   Map<String, dynamic> toJson() {
@@ -68,12 +70,9 @@ class Task {
       'id': id,
       'title': title,
       'description': description,
-      'createdAt':
-          createdAt.toIso8601String(),
-      'dueDate':
-          dueDate?.toIso8601String(),
-      'estimatedMinutes':
-          estimatedMinutes,
+      'createdAt': createdAt.toIso8601String(),
+      'dueDate': dueDate?.toIso8601String(),
+      'estimatedMinutes': estimatedMinutes,
       'priority': priority.name,
       'energyLevel': energyLevel.name,
       'isCompleted': isCompleted,
@@ -89,124 +88,80 @@ class Task {
       'steps': steps,
       'source': source.name,
       'type': type.name,
+      'placeRequirement': placeRequirement.name,
     };
   }
 
-  factory Task.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
       id: json['id'] as String,
       title: json['title'] as String,
-      description:
-          json['description'] as String?,
-      createdAt: DateTime.parse(
-        json['createdAt'] as String,
-      ),
+      description: json['description'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
       dueDate: json['dueDate'] != null
-          ? DateTime.parse(
-              json['dueDate'] as String,
-            )
+          ? DateTime.parse(json['dueDate'] as String)
           : null,
-      estimatedMinutes:
-          json['estimatedMinutes'] as int?,
+      estimatedMinutes: json['estimatedMinutes'] as int?,
 
-      priority:
-          TaskPriority.values.firstWhere(
-        (value) =>
-            value.name ==
-            json['priority'],
-        orElse: () =>
-            TaskPriority.normal,
+      priority: TaskPriority.values.firstWhere(
+        (value) => value.name == json['priority'],
+        orElse: () => TaskPriority.normal,
       ),
 
-      energyLevel:
-          EnergyLevel.values.firstWhere(
-        (value) =>
-            value.name ==
-            json['energyLevel'],
-        orElse: () =>
-            EnergyLevel.medium,
+      energyLevel: EnergyLevel.values.firstWhere(
+        (value) => value.name == json['energyLevel'],
+        orElse: () => EnergyLevel.medium,
       ),
 
-      isCompleted:
-          json['isCompleted'] as bool? ??
-              false,
+      isCompleted: json['isCompleted'] as bool? ?? false,
 
       //
       // Senos užduotys šio lauko
       // neturėjo.
       //
-      isRequired:
-          json['isRequired'] as bool? ??
-              false,
+      isRequired: json['isRequired'] as bool? ?? false,
 
       //
       // Senos užduotys neturėjo
       // actionType, todėl jos lieka
       // paprastomis užduotimis.
       //
-      actionType:
-          TaskActionType.values.firstWhere(
-        (value) =>
-            value.name ==
-            json['actionType'],
-        orElse: () =>
-            TaskActionType.none,
+      actionType: TaskActionType.values.firstWhere(
+        (value) => value.name == json['actionType'],
+        orElse: () => TaskActionType.none,
       ),
 
-      phoneNumber:
-          json['phoneNumber'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
 
-      emailAddress:
-          json['emailAddress'] as String?,
+      emailAddress: json['emailAddress'] as String?,
 
-      steps: List<String>.from(
-        json['steps'] ?? [],
-      ),
+      steps: List<String>.from(json['steps'] ?? []),
 
-      source:
-          TaskSource.values.firstWhere(
-        (value) =>
-            value.name ==
-            json['source'],
-        orElse: () =>
-            TaskSource.app,
+      source: TaskSource.values.firstWhere(
+        (value) => value.name == json['source'],
+        orElse: () => TaskSource.app,
       ),
 
       type: TaskType.values.firstWhere(
-        (value) =>
-            value.name ==
-            json['type'],
-        orElse: () =>
-            TaskType.task,
+        (value) => value.name == json['type'],
+        orElse: () => TaskType.task,
+      ),
+
+      placeRequirement: TaskPlaceRequirement.values.firstWhere(
+        (value) => value.name == json['placeRequirement'],
+        orElse: () => TaskPlaceRequirement.anywhere,
       ),
     );
   }
 }
 
-enum TaskPriority {
-  low,
-  normal,
-  high,
-  urgent,
-}
+enum TaskPriority { low, normal, high, urgent }
 
-enum EnergyLevel {
-  low,
-  medium,
-  high,
-}
+enum EnergyLevel { low, medium, high }
 
-enum TaskSource {
-  app,
-  calendar,
-}
+enum TaskSource { app, calendar }
 
-enum TaskType {
-  task,
-  calendarEvent,
-}
+enum TaskType { task, calendarEvent }
 
 //
 // Ką vartotojas turi padaryti,
@@ -229,3 +184,5 @@ enum TaskActionType {
   //
   email,
 }
+
+enum TaskPlaceRequirement { anywhere, home, work, school, childcare, other }

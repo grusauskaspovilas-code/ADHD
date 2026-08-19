@@ -9,16 +9,12 @@ import '../services/user_routine_service.dart';
 import '../services/guardian_service.dart';
 
 class AiContextService {
-  static Future<AiContext> build({
-    required List<Task> tasks,
-  }) async {
+  static Future<AiContext> build({required List<Task> tasks}) async {
     final now = DateTime.now();
 
-    final calendarEvents =
-        await CalendarService.getUpcomingEvents();
+    final calendarEvents = await CalendarService.getUpcomingEvents();
 
-    final routine =
-        await UserRoutineService.loadRoutine();
+    final routine = await UserRoutineService.loadRoutine();
 
     return _buildContext(
       now: now,
@@ -32,17 +28,14 @@ class AiContextService {
   // Paleidžia Guardian analizę naudojant
   // tuos pačius realius programėlės duomenis.
   //
-  static Future<List<GuardianResult>>
-      buildGuardian({
+  static Future<List<GuardianResult>> buildGuardian({
     required List<Task> tasks,
   }) async {
     final now = DateTime.now();
 
-    final calendarEvents =
-        await CalendarService.getUpcomingEvents();
+    final calendarEvents = await CalendarService.getUpcomingEvents();
 
-    final routine =
-        await UserRoutineService.loadRoutine();
+    final routine = await UserRoutineService.loadRoutine();
 
     return GuardianService.analyze(
       tasks: tasks,
@@ -58,8 +51,7 @@ class AiContextService {
     required List<Event> calendarEvents,
     required UserRoutine routine,
   }) {
-    final currentMinutes =
-        now.hour * 60 + now.minute;
+    final currentMinutes = now.hour * 60 + now.minute;
 
     //
     // 1. Patikriname, ar dabar vyksta
@@ -68,20 +60,15 @@ class AiContextService {
     RoutineBlock? currentRoutineBlock;
 
     for (final block in routine.blocks) {
-      final isToday =
-          block.weekdays.contains(
-        now.weekday,
-      );
+      final isToday = block.weekdays.contains(now.weekday);
 
       if (!isToday) {
         continue;
       }
 
       final isActive =
-          currentMinutes >=
-                  block.startMinutes &&
-              currentMinutes <
-                  block.endMinutes;
+          currentMinutes >= block.startMinutes &&
+          currentMinutes < block.endMinutes;
 
       if (isActive) {
         currentRoutineBlock = block;
@@ -100,21 +87,14 @@ class AiContextService {
         continue;
       }
 
-      if (event.status ==
-          EventStatus.canceled) {
+      if (event.status == EventStatus.canceled) {
         continue;
       }
 
       final start = event.startDate;
       final end = event.endDate;
 
-      if (end == null) {
-        continue;
-      }
-
-      final isActive =
-          !now.isBefore(start) &&
-              now.isBefore(end);
+      final isActive = !now.isBefore(start) && now.isBefore(end);
 
       if (isActive) {
         currentCalendarEvent = event;
@@ -127,8 +107,7 @@ class AiContextService {
     // dabar užimtas.
     //
     final currentlyBusy =
-        currentCalendarEvent != null ||
-            currentRoutineBlock != null;
+        currentCalendarEvent != null || currentRoutineBlock != null;
 
     String? currentActivity;
     DateTime? nextFreeTime;
@@ -138,29 +117,20 @@ class AiContextService {
     // prioritetą prieš rutiną.
     //
     if (currentCalendarEvent != null) {
-      final title =
-          currentCalendarEvent.title.trim();
+      final title = currentCalendarEvent.title.trim();
 
-      currentActivity = title.isEmpty
-          ? 'Calendar event'
-          : title;
+      currentActivity = title.isEmpty ? 'Calendar event' : title;
 
-      nextFreeTime =
-          currentCalendarEvent.endDate;
+      nextFreeTime = currentCalendarEvent.endDate;
     } else if (currentRoutineBlock != null) {
-      currentActivity =
-          currentRoutineBlock.title;
+      currentActivity = currentRoutineBlock.title;
 
       nextFreeTime = DateTime(
         now.year,
         now.month,
         now.day,
-        currentRoutineBlock
-                .endMinutes ~/
-            60,
-        currentRoutineBlock
-                .endMinutes %
-            60,
+        currentRoutineBlock.endMinutes ~/ 60,
+        currentRoutineBlock.endMinutes % 60,
       );
     }
 
@@ -169,15 +139,12 @@ class AiContextService {
     // randame tikrą kitą
     // laisvą laiką.
     //
-    if (currentlyBusy &&
-        nextFreeTime != null) {
-      nextFreeTime =
-          _findRealNextFreeTime(
+    if (currentlyBusy && nextFreeTime != null) {
+      nextFreeTime = _findRealNextFreeTime(
         now: now,
         initialFreeTime: nextFreeTime,
         routine: routine,
-        calendarEvents:
-            calendarEvents,
+        calendarEvents: calendarEvents,
       );
     }
 
@@ -189,22 +156,16 @@ class AiContextService {
     int? freeMinutesNow;
 
     if (!currentlyBusy) {
-      final nextBusyTime =
-          _findNextBusyTime(
+      final nextBusyTime = _findNextBusyTime(
         now: now,
         routine: routine,
-        calendarEvents:
-            calendarEvents,
+        calendarEvents: calendarEvents,
       );
 
       if (nextBusyTime != null) {
-        final difference =
-            nextBusyTime.difference(
-          now,
-        );
+        final difference = nextBusyTime.difference(now);
 
-        freeMinutesNow =
-            difference.inMinutes;
+        freeMinutesNow = difference.inMinutes;
 
         if (freeMinutesNow < 0) {
           freeMinutesNow = 0;
@@ -217,17 +178,12 @@ class AiContextService {
     return AiContext(
       now: now,
       tasks: tasks,
-      calendarEvents:
-          calendarEvents,
+      calendarEvents: calendarEvents,
       routine: routine,
-      currentlyBusy:
-          currentlyBusy,
-      currentActivity:
-          currentActivity,
-      freeMinutesNow:
-          freeMinutesNow,
-      nextFreeTime:
-          nextFreeTime,
+      currentlyBusy: currentlyBusy,
+      currentActivity: currentActivity,
+      freeMinutesNow: freeMinutesNow,
+      nextFreeTime: nextFreeTime,
     );
   }
 
@@ -238,21 +194,17 @@ class AiContextService {
   }) {
     final candidates = <DateTime>[];
 
-    final currentMinutes =
-        now.hour * 60 + now.minute;
+    final currentMinutes = now.hour * 60 + now.minute;
 
     //
     // Šiandienos rutinos blokai.
     //
     for (final block in routine.blocks) {
-      if (!block.weekdays.contains(
-        now.weekday,
-      )) {
+      if (!block.weekdays.contains(now.weekday)) {
         continue;
       }
 
-      if (block.startMinutes <=
-          currentMinutes) {
+      if (block.startMinutes <= currentMinutes) {
         continue;
       }
 
@@ -276,27 +228,21 @@ class AiContextService {
         continue;
       }
 
-      if (event.status ==
-          EventStatus.canceled) {
+      if (event.status == EventStatus.canceled) {
         continue;
       }
 
       if (event.startDate.isAfter(now)) {
-        candidates.add(
-          event.startDate,
-        );
+        candidates.add(event.startDate);
       }
     }
 
     //
     // Miego pradžia.
     //
-    final sleepMinutes =
-        routine.sleepStartMinutes;
+    final sleepMinutes = routine.sleepStartMinutes;
 
-    if (sleepMinutes != null &&
-        sleepMinutes >
-            currentMinutes) {
+    if (sleepMinutes != null && sleepMinutes > currentMinutes) {
       candidates.add(
         DateTime(
           now.year,
@@ -344,9 +290,7 @@ class AiContextService {
       // Rutinos blokai.
       //
       for (final block in routine.blocks) {
-        if (!block.weekdays.contains(
-          freeTime.weekday,
-        )) {
+        if (!block.weekdays.contains(freeTime.weekday)) {
           continue;
         }
 
@@ -366,18 +310,9 @@ class AiContextService {
           block.endMinutes % 60,
         );
 
-        if (!blockStart.isAfter(
-              freeTime,
-            ) &&
-            blockEnd.isAfter(
-              freeTime,
-            )) {
-          if (extendedUntil == null ||
-              blockEnd.isAfter(
-                extendedUntil,
-              )) {
-            extendedUntil =
-                blockEnd;
+        if (!blockStart.isAfter(freeTime) && blockEnd.isAfter(freeTime)) {
+          if (extendedUntil == null || blockEnd.isAfter(extendedUntil)) {
+            extendedUntil = blockEnd;
           }
         }
       }
@@ -385,42 +320,25 @@ class AiContextService {
       //
       // Kalendoriaus įvykiai.
       //
-      for (final event
-          in calendarEvents) {
+      for (final event in calendarEvents) {
         if (event.isAllDay) {
           continue;
         }
 
-        if (event.status ==
-            EventStatus.canceled) {
+        if (event.status == EventStatus.canceled) {
           continue;
         }
 
         final end = event.endDate;
 
-        if (end == null) {
-          continue;
-        }
-
-        if (!event.startDate.isAfter(
-              freeTime,
-            ) &&
-            end.isAfter(
-              freeTime,
-            )) {
-          if (extendedUntil == null ||
-              end.isAfter(
-                extendedUntil,
-              )) {
+        if (!event.startDate.isAfter(freeTime) && end.isAfter(freeTime)) {
+          if (extendedUntil == null || end.isAfter(extendedUntil)) {
             extendedUntil = end;
           }
         }
       }
 
-      if (extendedUntil == null ||
-          !extendedUntil.isAfter(
-            freeTime,
-          )) {
+      if (extendedUntil == null || !extendedUntil.isAfter(freeTime)) {
         break;
       }
 
