@@ -5,6 +5,138 @@ class HomeStrings {
 
   const HomeStrings(this.language);
 
+  String get busyTitle {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Dabar esi užimtas';
+      case AppLanguage.german:
+        return 'Du bist gerade beschäftigt';
+      default:
+        return 'You are busy right now';
+    }
+  }
+
+  String busyUntil(String time) {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Iki $time';
+      case AppLanguage.german:
+        return 'Bis $time';
+      default:
+        return 'Until $time';
+    }
+  }
+
+  String get suggestAnyway {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'VIS TIEK PASIŪLYK UŽDUOTĮ';
+      case AppLanguage.german:
+        return 'TROTZDEM AUFGABE VORSCHLAGEN';
+      default:
+        return 'SUGGEST A TASK ANYWAY';
+    }
+  }
+
+  String get busyOk {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Gerai';
+      case AppLanguage.german:
+        return 'Okay';
+      default:
+        return 'OK';
+    }
+  }
+
+  String get myRoutine {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Mano rutina';
+      case AppLanguage.german:
+        return 'Meine Routine';
+      default:
+        return 'My routine';
+    }
+  }
+
+  String get mySchedule {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Mano dienotvarkė';
+      case AppLanguage.german:
+        return 'Mein Tagesplan';
+      default:
+        return 'My schedule';
+    }
+  }
+
+  String get importantPlaces {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Svarbios vietos';
+      case AppLanguage.german:
+        return 'Wichtige Orte';
+      default:
+        return 'Important places';
+    }
+  }
+
+  String locationContext(String placeName) {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Vietos kontekstas: $placeName';
+      case AppLanguage.german:
+        return 'Standortkontext: $placeName';
+      default:
+        return 'Location context: $placeName';
+    }
+  }
+
+  String get guardianTest {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Guardian testas';
+      case AppLanguage.german:
+        return 'Guardian-Test';
+      default:
+        return 'Guardian test';
+    }
+  }
+
+  String get notificationTest {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Pranešimo testas';
+      case AppLanguage.german:
+        return 'Benachrichtigung testen';
+      default:
+        return 'Test notification';
+    }
+  }
+
+  String get scheduledNotificationTest {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Pranešimas po 2 min.';
+      case AppLanguage.german:
+        return 'Benachrichtigung in 2 Min.';
+      default:
+        return 'Notification in 2 min';
+    }
+  }
+
+  String get notificationScheduled {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Pranešimas suplanuotas po 2 min.';
+      case AppLanguage.german:
+        return 'Benachrichtigung für in 2 Minuten geplant.';
+      default:
+        return 'Notification scheduled for 2 minutes from now.';
+    }
+  }
+
   String get calendarTime {
     switch (language) {
       case AppLanguage.lithuanian:
@@ -140,50 +272,50 @@ class HomeStrings {
         return 'There is no free time before the next event.';
     }
   }
-  
+
   String get noCalendarEventTitle {
-  switch (language) {
-    case AppLanguage.lithuanian:
-      return 'Artimiausių įvykių nėra';
-    case AppLanguage.german:
-      return 'Keine kommenden Termine';
-    default:
-      return 'No upcoming events';
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Artimiausių įvykių nėra';
+      case AppLanguage.german:
+        return 'Keine kommenden Termine';
+      default:
+        return 'No upcoming events';
+    }
   }
-}
 
-String get noCalendarEventSubtitle {
-  switch (language) {
-    case AppLanguage.lithuanian:
-      return 'Galiu parinkti užduotį neatsižvelgdamas į kalendorių.';
-    case AppLanguage.german:
-      return 'Ich kann eine Aufgabe auswählen, ohne den Kalender zu berücksichtigen.';
-    default:
-      return 'I can choose a task without using your calendar.';
+  String get noCalendarEventSubtitle {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Galiu parinkti užduotį neatsižvelgdamas į kalendorių.';
+      case AppLanguage.german:
+        return 'Ich kann eine Aufgabe auswählen, ohne den Kalender zu berücksichtigen.';
+      default:
+        return 'I can choose a task without using your calendar.';
+    }
   }
-}
 
-String get selectTaskAnyway {
-  switch (language) {
-    case AppLanguage.lithuanian:
-      return 'PARINKTI UŽDUOTĮ';
-    case AppLanguage.german:
-      return 'AUFGABE AUSWÄHLEN';
-    default:
-      return 'CHOOSE A TASK';
+  String get selectTaskAnyway {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'PARINKTI UŽDUOTĮ';
+      case AppLanguage.german:
+        return 'AUFGABE AUSWÄHLEN';
+      default:
+        return 'CHOOSE A TASK';
+    }
   }
-}
 
-String get cancel {
-  switch (language) {
-    case AppLanguage.lithuanian:
-      return 'Atšaukti';
-    case AppLanguage.german:
-      return 'Abbrechen';
-    default:
-      return 'Cancel';
+  String get cancel {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Atšaukti';
+      case AppLanguage.german:
+        return 'Abbrechen';
+      default:
+        return 'Cancel';
+    }
   }
-}
 
   String get today {
     switch (language) {
@@ -228,28 +360,28 @@ String get cancel {
         return 'No deadline';
     }
   }
-  
- String get aiLoadingTitle {
-  switch (language) {
-    case AppLanguage.lithuanian:
-      return 'AI renka užduotį...';
-    case AppLanguage.german:
-      return 'KI wählt eine Aufgabe aus...';
-    default:
-      return 'AI is choosing a task...';
-  }
-}
 
-String get aiLoadingSubtitle {
-  switch (language) {
-    case AppLanguage.lithuanian:
-      return 'Atsižvelgiu į tavo laiką, prioritetus ir užduotis.';
-    case AppLanguage.german:
-      return 'Ich berücksichtige deine Zeit, Prioritäten und Aufgaben.';
-    default:
-      return 'Considering your time, priorities, and tasks.';
+  String get aiLoadingTitle {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'AI renka užduotį...';
+      case AppLanguage.german:
+        return 'KI wählt eine Aufgabe aus...';
+      default:
+        return 'AI is choosing a task...';
+    }
   }
-}
+
+  String get aiLoadingSubtitle {
+    switch (language) {
+      case AppLanguage.lithuanian:
+        return 'Atsižvelgiu į tavo laiką, prioritetus ir užduotis.';
+      case AppLanguage.german:
+        return 'Ich berücksichtige deine Zeit, Prioritäten und Aufgaben.';
+      default:
+        return 'Considering your time, priorities, and tasks.';
+    }
+  }
 
   String get unknownDuration {
     switch (language) {
@@ -269,20 +401,11 @@ String get aiLoadingSubtitle {
 
     final now = DateTime.now();
 
-    final todayDate = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    );
+    final todayDate = DateTime(now.year, now.month, now.day);
 
-    final taskDate = DateTime(
-      dueDate.year,
-      dueDate.month,
-      dueDate.day,
-    );
+    final taskDate = DateTime(dueDate.year, dueDate.month, dueDate.day);
 
-    final difference =
-        taskDate.difference(todayDate).inDays;
+    final difference = taskDate.difference(todayDate).inDays;
 
     if (difference < 0) {
       return overdue;

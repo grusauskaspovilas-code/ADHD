@@ -9,18 +9,13 @@ import '../services/calendar_service.dart';
 class ScheduleScreen extends StatefulWidget {
   final AppLanguage language;
 
-  const ScheduleScreen({
-    super.key,
-    required this.language,
-  });
+  const ScheduleScreen({super.key, required this.language});
 
   @override
-  State<ScheduleScreen> createState() =>
-      _ScheduleScreenState();
+  State<ScheduleScreen> createState() => _ScheduleScreenState();
 }
 
-class _ScheduleScreenState
-    extends State<ScheduleScreen> {
+class _ScheduleScreenState extends State<ScheduleScreen> {
   UserRoutine _routine = const UserRoutine();
 
   List<Event> _calendarEvents = [];
@@ -40,11 +35,9 @@ class _ScheduleScreenState
       });
     }
 
-    final routine =
-        await UserRoutineService.loadRoutine();
+    final routine = await UserRoutineService.loadRoutine();
 
-    final events =
-        await CalendarService.getUpcomingEvents();
+    final events = await CalendarService.getUpcomingEvents();
 
     if (!mounted) return;
 
@@ -187,17 +180,11 @@ class _ScheduleScreenState
     }
   }
 
-  bool _blockIsToday(
-    RoutineBlock block,
-  ) {
-    return block.weekdays.contains(
-      DateTime.now().weekday,
-    );
+  bool _blockIsToday(RoutineBlock block) {
+    return block.weekdays.contains(DateTime.now().weekday);
   }
 
-  bool _eventIsToday(
-    Event event,
-  ) {
+  bool _eventIsToday(Event event) {
     final now = DateTime.now();
     final date = event.startDate;
 
@@ -206,9 +193,7 @@ class _ScheduleScreenState
         date.day == now.day;
   }
 
-  int _minutesFromDateTime(
-    DateTime date,
-  ) {
+  int _minutesFromDateTime(DateTime date) {
     return date.hour * 60 + date.minute;
   }
 
@@ -221,8 +206,7 @@ class _ScheduleScreenState
   List<_BusyPeriod> _createBusyPeriods() {
     final periods = <_BusyPeriod>[];
 
-    for (final block
-        in _routine.blocks.where(_blockIsToday)) {
+    for (final block in _routine.blocks.where(_blockIsToday)) {
       periods.add(
         _BusyPeriod(
           startMinutes: block.startMinutes,
@@ -231,34 +215,19 @@ class _ScheduleScreenState
       );
     }
 
-    for (final event
-        in _calendarEvents.where(_eventIsToday)) {
-      final start =
-          _minutesFromDateTime(event.startDate);
+    for (final event in _calendarEvents.where(_eventIsToday)) {
+      final start = _minutesFromDateTime(event.startDate);
 
-      final endDate = event.endDate;
-
-      var end = endDate != null
-          ? _minutesFromDateTime(endDate)
-          : start + 30;
+      var end = _minutesFromDateTime(event.endDate);
 
       if (end <= start) {
         end = start + 30;
       }
 
-      periods.add(
-        _BusyPeriod(
-          startMinutes: start,
-          endMinutes: end,
-        ),
-      );
+      periods.add(_BusyPeriod(startMinutes: start, endMinutes: end));
     }
 
-    periods.sort(
-      (a, b) => a.startMinutes.compareTo(
-        b.startMinutes,
-      ),
-    );
+    periods.sort((a, b) => a.startMinutes.compareTo(b.startMinutes));
 
     final merged = <_BusyPeriod>[];
 
@@ -270,15 +239,12 @@ class _ScheduleScreenState
 
       final last = merged.last;
 
-      if (period.startMinutes <=
-          last.endMinutes) {
-        merged[merged.length - 1] =
-            _BusyPeriod(
+      if (period.startMinutes <= last.endMinutes) {
+        merged[merged.length - 1] = _BusyPeriod(
           startMinutes: last.startMinutes,
-          endMinutes:
-              period.endMinutes > last.endMinutes
-                  ? period.endMinutes
-                  : last.endMinutes,
+          endMinutes: period.endMinutes > last.endMinutes
+              ? period.endMinutes
+              : last.endMinutes,
         );
       } else {
         merged.add(period);
@@ -299,11 +265,8 @@ class _ScheduleScreenState
     if (_routine.wakeUpMinutes != null) {
       entries.add(
         _ScheduleEntry(
-          sortMinutes:
-              _routine.wakeUpMinutes!,
-          time: _formatMinutes(
-            _routine.wakeUpMinutes!,
-          ),
+          sortMinutes: _routine.wakeUpMinutes!,
+          time: _formatMinutes(_routine.wakeUpMinutes!),
           title: _wakeUpText,
           icon: Icons.wb_sunny_outlined,
           type: _ScheduleEntryType.routine,
@@ -314,8 +277,7 @@ class _ScheduleScreenState
     //
     // Rutinos blokai
     //
-    for (final block
-        in _routine.blocks.where(_blockIsToday)) {
+    for (final block in _routine.blocks.where(_blockIsToday)) {
       entries.add(
         _ScheduleEntry(
           sortMinutes: block.startMinutes,
@@ -333,35 +295,25 @@ class _ScheduleScreenState
     //
     // Telefono kalendorius
     //
-    for (final event
-        in _calendarEvents.where(_eventIsToday)) {
-      final start =
-          _minutesFromDateTime(event.startDate);
+    for (final event in _calendarEvents.where(_eventIsToday)) {
+      final start = _minutesFromDateTime(event.startDate);
 
-      final endDate = event.endDate;
+      String time = _formatMinutes(start);
 
-      String time =
-          _formatMinutes(start);
+      final end = _minutesFromDateTime(event.endDate);
 
-      if (endDate != null) {
-        final end =
-            _minutesFromDateTime(endDate);
-
-        if (end > start) {
-          time =
-              '${_formatMinutes(start)}'
-              '–'
-              '${_formatMinutes(end)}';
-        }
+      if (end > start) {
+        time =
+            '${_formatMinutes(start)}'
+            '–'
+            '${_formatMinutes(end)}';
       }
 
       entries.add(
         _ScheduleEntry(
           sortMinutes: start,
           time: time,
-          title: event.title.trim().isEmpty
-              ? _calendarEventText
-              : event.title,
+          title: event.title.trim().isEmpty ? _calendarEventText : event.title,
           icon: Icons.event_outlined,
           type: _ScheduleEntryType.calendar,
         ),
@@ -371,18 +323,15 @@ class _ScheduleScreenState
     //
     // Laisvas laikas tik nuo DABAR
     //
-    final wakeUp =
-        _routine.wakeUpMinutes;
+    final wakeUp = _routine.wakeUpMinutes;
 
-    final sleep =
-        _routine.sleepStartMinutes;
+    final sleep = _routine.sleepStartMinutes;
 
     if (wakeUp != null &&
         sleep != null &&
         sleep > wakeUp &&
         nowMinutes < sleep) {
-      final busyPeriods =
-          _createBusyPeriods();
+      final busyPeriods = _createBusyPeriods();
 
       //
       // Jei dar prieš kėlimosi laiką,
@@ -390,9 +339,7 @@ class _ScheduleScreenState
       // Jei jau atsikėlimo laikas praėjo,
       // pradedame nuo realaus dabartinio laiko.
       //
-      var cursor = nowMinutes > wakeUp
-          ? nowMinutes
-          : wakeUp;
+      var cursor = nowMinutes > wakeUp ? nowMinutes : wakeUp;
 
       for (final period in busyPeriods) {
         if (period.endMinutes <= cursor) {
@@ -403,19 +350,14 @@ class _ScheduleScreenState
           break;
         }
 
-        final busyStart =
-            period.startMinutes < wakeUp
-                ? wakeUp
-                : period.startMinutes;
+        final busyStart = period.startMinutes < wakeUp
+            ? wakeUp
+            : period.startMinutes;
 
-        final busyEnd =
-            period.endMinutes > sleep
-                ? sleep
-                : period.endMinutes;
+        final busyEnd = period.endMinutes > sleep ? sleep : period.endMinutes;
 
         if (busyStart > cursor) {
-          final freeMinutes =
-              busyStart - cursor;
+          final freeMinutes = busyStart - cursor;
 
           entries.add(
             _ScheduleEntry(
@@ -428,11 +370,8 @@ class _ScheduleScreenState
                   '$_freeTimeText · '
                   '${_formatDuration(freeMinutes)}',
               icon: Icons.schedule_outlined,
-              type:
-                  _ScheduleEntryType.freeTime,
-              isNow:
-                  nowMinutes >= wakeUp &&
-                  cursor == nowMinutes,
+              type: _ScheduleEntryType.freeTime,
+              isNow: nowMinutes >= wakeUp && cursor == nowMinutes,
             ),
           );
         }
@@ -443,8 +382,7 @@ class _ScheduleScreenState
       }
 
       if (cursor < sleep) {
-        final freeMinutes =
-            sleep - cursor;
+        final freeMinutes = sleep - cursor;
 
         entries.add(
           _ScheduleEntry(
@@ -457,11 +395,8 @@ class _ScheduleScreenState
                 '$_freeTimeText · '
                 '${_formatDuration(freeMinutes)}',
             icon: Icons.schedule_outlined,
-            type:
-                _ScheduleEntryType.freeTime,
-            isNow:
-                nowMinutes >= wakeUp &&
-                cursor == nowMinutes,
+            type: _ScheduleEntryType.freeTime,
+            isNow: nowMinutes >= wakeUp && cursor == nowMinutes,
           ),
         );
       }
@@ -473,11 +408,8 @@ class _ScheduleScreenState
     if (_routine.sleepStartMinutes != null) {
       entries.add(
         _ScheduleEntry(
-          sortMinutes:
-              _routine.sleepStartMinutes!,
-          time: _formatMinutes(
-            _routine.sleepStartMinutes!,
-          ),
+          sortMinutes: _routine.sleepStartMinutes!,
+          time: _formatMinutes(_routine.sleepStartMinutes!),
           title: _sleepText,
           icon: Icons.bedtime_outlined,
           type: _ScheduleEntryType.routine,
@@ -485,32 +417,25 @@ class _ScheduleScreenState
       );
     }
 
-    entries.sort(
-      (a, b) {
-        final compare = a.sortMinutes
-            .compareTo(b.sortMinutes);
+    entries.sort((a, b) {
+      final compare = a.sortMinutes.compareTo(b.sortMinutes);
 
-        if (compare != 0) {
-          return compare;
-        }
+      if (compare != 0) {
+        return compare;
+      }
 
-        if (a.type ==
-                _ScheduleEntryType.freeTime &&
-            b.type !=
-                _ScheduleEntryType.freeTime) {
-          return 1;
-        }
+      if (a.type == _ScheduleEntryType.freeTime &&
+          b.type != _ScheduleEntryType.freeTime) {
+        return 1;
+      }
 
-        if (b.type ==
-                _ScheduleEntryType.freeTime &&
-            a.type !=
-                _ScheduleEntryType.freeTime) {
-          return -1;
-        }
+      if (b.type == _ScheduleEntryType.freeTime &&
+          a.type != _ScheduleEntryType.freeTime) {
+        return -1;
+      }
 
-        return 0;
-      },
-    );
+      return 0;
+    });
 
     return entries;
   }
@@ -523,34 +448,23 @@ class _ScheduleScreenState
       appBar: AppBar(
         title: Text(_title),
         actions: [
-          IconButton(
-            onPressed: _loadSchedule,
-            icon: const Icon(
-              Icons.refresh,
-            ),
-          ),
+          IconButton(onPressed: _loadSchedule, icon: const Icon(Icons.refresh)),
         ],
       ),
       body: SafeArea(
         child: _isLoading
-            ? const Center(
-                child:
-                    CircularProgressIndicator(),
-              )
+            ? const Center(child: CircularProgressIndicator())
             : RefreshIndicator(
                 onRefresh: _loadSchedule,
                 child: ListView(
-                  physics:
-                      const AlwaysScrollableScrollPhysics(),
-                  padding:
-                      const EdgeInsets.all(20),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
                   children: [
                     Text(
                       _subtitle,
                       style: TextStyle(
                         fontSize: 17,
-                        color:
-                            Colors.grey.shade700,
+                        color: Colors.grey.shade700,
                       ),
                     ),
 
@@ -558,28 +472,19 @@ class _ScheduleScreenState
 
                     if (entries.isEmpty)
                       Padding(
-                        padding:
-                            const EdgeInsets.only(
-                          top: 60,
-                        ),
+                        padding: const EdgeInsets.only(top: 60),
                         child: Center(
-                          child: Text(
-                            _emptyText,
-                            textAlign:
-                                TextAlign.center,
-                          ),
+                          child: Text(_emptyText, textAlign: TextAlign.center),
                         ),
                       ),
 
                     ...entries.map(
-                      (entry) =>
-                          _ScheduleItem(
+                      (entry) => _ScheduleItem(
                         icon: entry.icon,
                         time: entry.time,
                         title: entry.title,
                         type: entry.type,
-                        calendarText:
-                            _calendarEventText,
+                        calendarText: _calendarEventText,
                         nowText: _nowText,
                         isNow: entry.isNow,
                       ),
@@ -592,11 +497,7 @@ class _ScheduleScreenState
   }
 }
 
-enum _ScheduleEntryType {
-  routine,
-  calendar,
-  freeTime,
-}
+enum _ScheduleEntryType { routine, calendar, freeTime }
 
 class _ScheduleEntry {
   final int sortMinutes;
@@ -620,10 +521,7 @@ class _BusyPeriod {
   final int startMinutes;
   final int endMinutes;
 
-  const _BusyPeriod({
-    required this.startMinutes,
-    required this.endMinutes,
-  });
+  const _BusyPeriod({required this.startMinutes, required this.endMinutes});
 }
 
 class _ScheduleItem extends StatelessWidget {
@@ -647,45 +545,34 @@ class _ScheduleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCalendar =
-        type == _ScheduleEntryType.calendar;
+    final isCalendar = type == _ScheduleEntryType.calendar;
 
-    final isFreeTime =
-        type == _ScheduleEntryType.freeTime;
+    final isFreeTime = type == _ScheduleEntryType.freeTime;
 
     return Card(
-      margin: const EdgeInsets.only(
-        bottom: 10,
-      ),
+      margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               width: 95,
               child: Text(
                 time,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
 
             const SizedBox(width: 8),
 
-            Icon(
-              icon,
-              size: 28,
-            ),
+            Icon(icon, size: 28),
 
             const SizedBox(width: 14),
 
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (isNow) ...[
                     Text(
@@ -693,9 +580,7 @@ class _ScheduleItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
 
@@ -719,8 +604,7 @@ class _ScheduleItem extends StatelessWidget {
                       calendarText,
                       style: TextStyle(
                         fontSize: 13,
-                        color:
-                            Colors.grey.shade600,
+                        color: Colors.grey.shade600,
                       ),
                     ),
                   ],

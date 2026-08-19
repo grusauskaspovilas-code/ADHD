@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'l10n/app_language.dart';
-
 import 'models/task.dart';
 
 import 'screens/home_screen.dart';
@@ -11,21 +9,16 @@ import 'services/language_service.dart';
 import 'services/notification_service.dart';
 import 'services/task_service.dart';
 
-final GlobalKey<NavigatorState> navigatorKey =
-    GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class FocusAssistantApp extends StatefulWidget {
-  const FocusAssistantApp({
-    super.key,
-  });
+  const FocusAssistantApp({super.key});
 
   @override
-  State<FocusAssistantApp> createState() =>
-      _FocusAssistantAppState();
+  State<FocusAssistantApp> createState() => _FocusAssistantAppState();
 }
 
-class _FocusAssistantAppState
-    extends State<FocusAssistantApp> {
+class _FocusAssistantAppState extends State<FocusAssistantApp> {
   @override
   void initState() {
     super.initState();
@@ -34,9 +27,7 @@ class _FocusAssistantAppState
     // Notification paspaudimas,
     // kai aplikacija jau veikia.
     //
-    NotificationService
-            .onTaskNotificationTapped =
-        _openTaskFromNotification;
+    NotificationService.onTaskNotificationTapped = _openTaskFromNotification;
 
     //
     // Kai aplikacija paleidžiama
@@ -45,46 +36,35 @@ class _FocusAssistantAppState
     //
     // Todėl palaukiame pirmo frame.
     //
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _openPendingNotification();
     });
   }
 
   @override
   void dispose() {
-    NotificationService
-        .onTaskNotificationTapped = null;
+    NotificationService.onTaskNotificationTapped = null;
 
     super.dispose();
   }
 
-  Future<void>
-      _openPendingNotification() async {
-    final taskId =
-        NotificationService.pendingTaskId;
+  Future<void> _openPendingNotification() async {
+    final taskId = NotificationService.pendingTaskId;
 
-    if (taskId == null ||
-        taskId.isEmpty) {
+    if (taskId == null || taskId.isEmpty) {
       return;
     }
 
-    NotificationService.pendingTaskId =
-        null;
+    NotificationService.pendingTaskId = null;
 
-    await _openTaskFromNotification(
-      taskId,
-    );
+    await _openTaskFromNotification(taskId);
   }
 
-  Future<void> _openTaskFromNotification(
-    String taskId,
-  ) async {
+  Future<void> _openTaskFromNotification(String taskId) async {
     //
     // Surandame konkrečią užduotį.
     //
-    final tasks =
-        await TaskService.loadTasks();
+    final tasks = await TaskService.loadTasks();
 
     Task? selectedTask;
 
@@ -95,24 +75,18 @@ class _FocusAssistantAppState
       }
     }
 
-    if (selectedTask == null ||
-        selectedTask.isCompleted) {
+    if (selectedTask == null || selectedTask.isCompleted) {
       return;
     }
 
     //
     // Pasiimame vartotojo kalbą.
     //
-    final savedLanguage =
-        await LanguageService.loadLanguage();
+    final savedLanguage = await LanguageService.loadLanguage();
 
-    final language =
-        LanguageService.resolve(
-      savedLanguage,
-    );
+    final language = LanguageService.resolve(savedLanguage);
 
-    final navigator =
-        navigatorKey.currentState;
+    final navigator = navigatorKey.currentState;
 
     if (navigator == null) {
       //
@@ -120,20 +94,15 @@ class _FocusAssistantAppState
       // priežasties dar neparuoštas,
       // neprarandame taskId.
       //
-      NotificationService.pendingTaskId =
-          taskId;
+      NotificationService.pendingTaskId = taskId;
 
       return;
     }
 
-    final completed =
-        await navigator.push<bool>(
+    final completed = await navigator.push<bool>(
       MaterialPageRoute(
         builder: (context) =>
-            NextTaskScreen(
-          task: selectedTask!,
-          language: language,
-        ),
+            NextTaskScreen(task: selectedTask!, language: language),
       ),
     );
 
@@ -143,10 +112,7 @@ class _FocusAssistantAppState
     // atidaryto ekrano.
     //
     if (completed == true) {
-      await TaskService.setCompleted(
-        selectedTask.id,
-        true,
-      );
+      await TaskService.setCompleted(selectedTask.id, true);
     }
   }
 
@@ -158,11 +124,7 @@ class _FocusAssistantAppState
       title: 'Focus Assistant',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme:
-            ColorScheme.fromSeed(
-          seedColor:
-              const Color(0xFF6750A4),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6750A4)),
       ),
       home: const HomeScreen(),
     );

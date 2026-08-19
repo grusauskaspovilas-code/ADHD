@@ -220,6 +220,61 @@ class AppStrings {
     }
   }
 
+  String get editTask {
+    switch (language) {
+      case AppLanguage.german:
+        return 'Aufgabe bearbeiten';
+      case AppLanguage.lithuanian:
+        return 'Redaguoti užduotį';
+      default:
+        return 'Edit task';
+    }
+  }
+
+  String get saveChanges {
+    switch (language) {
+      case AppLanguage.german:
+        return 'ÄNDERUNGEN SPEICHERN';
+      case AppLanguage.lithuanian:
+        return 'IŠSAUGOTI PAKEITIMUS';
+      default:
+        return 'SAVE CHANGES';
+    }
+  }
+
+  String get undo {
+    switch (language) {
+      case AppLanguage.german:
+        return 'RÜCKGÄNGIG';
+      case AppLanguage.lithuanian:
+        return 'ATŠAUKTI';
+      default:
+        return 'UNDO';
+    }
+  }
+
+  String taskDeleted(String title) {
+    switch (language) {
+      case AppLanguage.german:
+        return 'Aufgabe gelöscht: $title';
+      case AppLanguage.lithuanian:
+        return 'Užduotis ištrinta: $title';
+      default:
+        return 'Task deleted: $title';
+    }
+  }
+
+  String taskCompleted(String title) {
+    switch (language) {
+      case AppLanguage.german:
+        return 'Aufgabe erledigt: $title';
+      case AppLanguage.lithuanian:
+        return 'Užduotis atlikta: $title';
+      default:
+        return 'Task completed: $title';
+    }
+  }
+
   // VALUES
 
   String priorityName(String value) {

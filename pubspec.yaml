@@ -39,6 +39,9 @@ dependencies:
   device_calendar_plus: ^0.7.1
   shared_preferences: ^2.5.3
   flutter_local_notifications: ^19.4.0
+  flutter_timezone: ^5.1.0
+  geolocator: ^14.0.2
+  geocoding: ^5.0.0
   timezone: ^0.10.1
 
 

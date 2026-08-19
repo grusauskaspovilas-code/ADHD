@@ -44,50 +44,36 @@ class GuardianService {
     required List<Event> calendarEvents,
     DateTime? now,
   }) {
-    final currentTime =
-        now ?? DateTime.now();
+    final currentTime = now ?? DateTime.now();
 
-    final requiredTasks = tasks.where(
-      (task) {
-        return task.isRequired &&
-            !task.isCompleted &&
-            task.dueDate != null;
-      },
-    ).toList();
+    final requiredTasks = tasks.where((task) {
+      return task.isRequired && !task.isCompleted && task.dueDate != null;
+    }).toList();
 
     final results = <GuardianResult>[];
 
     for (final task in requiredTasks) {
       final deadline = task.dueDate!;
 
-      final timeUntilDeadline =
-          deadline.difference(
-        currentTime,
-      );
+      final timeUntilDeadline = deadline.difference(currentTime);
 
-      final isOverdue =
-          !deadline.isAfter(currentTime);
+      final isOverdue = !deadline.isAfter(currentTime);
 
-      final estimatedMinutes =
-          task.estimatedMinutes ?? 30;
+      final estimatedMinutes = task.estimatedMinutes ?? 30;
 
       DateTime? suggestedStart;
 
       if (!isOverdue) {
-        suggestedStart =
-            _findNextFreeSlot(
+        suggestedStart = _findNextFreeSlot(
           now: currentTime,
           deadline: deadline,
-          requiredMinutes:
-              estimatedMinutes,
+          requiredMinutes: estimatedMinutes,
           routine: routine,
-          calendarEvents:
-              calendarEvents,
+          calendarEvents: calendarEvents,
         );
       }
 
-      final canStillFit =
-          suggestedStart != null;
+      final canStillFit = suggestedStart != null;
 
       //
       // Pirmoji Guardian versija.
@@ -100,20 +86,16 @@ class GuardianService {
       //    tinkamo laisvo lango.
       //
       final isUrgent =
-          isOverdue ||
-          timeUntilDeadline.inHours <= 24 ||
-          !canStillFit;
+          isOverdue || timeUntilDeadline.inHours <= 24 || !canStillFit;
 
       results.add(
         GuardianResult(
           task: task,
-          timeUntilDeadline:
-              timeUntilDeadline,
+          timeUntilDeadline: timeUntilDeadline,
           isOverdue: isOverdue,
           isUrgent: isUrgent,
           canStillFit: canStillFit,
-          suggestedStart:
-              suggestedStart,
+          suggestedStart: suggestedStart,
         ),
       );
     }
@@ -121,23 +103,35 @@ class GuardianService {
     //
     // Pavojingiausios užduotys viršuje.
     //
-    results.sort(
-      (a, b) {
-        if (a.isOverdue != b.isOverdue) {
-          return a.isOverdue ? -1 : 1;
-        }
+    results.sort((a, b) {
+      if (a.isOverdue != b.isOverdue) {
+        return a.isOverdue ? -1 : 1;
+      }
 
-        if (a.isUrgent != b.isUrgent) {
-          return a.isUrgent ? -1 : 1;
-        }
+      if (a.isUrgent != b.isUrgent) {
+        return a.isUrgent ? -1 : 1;
+      }
 
-        return a.task.dueDate!.compareTo(
-          b.task.dueDate!,
-        );
-      },
-    );
+      return a.task.dueDate!.compareTo(b.task.dueDate!);
+    });
 
     return results;
+  }
+
+  static DateTime? findAvailableSlot({
+    required DateTime windowStart,
+    required DateTime windowEnd,
+    required int requiredMinutes,
+    required UserRoutine routine,
+    required List<Event> calendarEvents,
+  }) {
+    return _findNextFreeSlot(
+      now: windowStart,
+      deadline: windowEnd,
+      requiredMinutes: requiredMinutes,
+      routine: routine,
+      calendarEvents: calendarEvents,
+    );
   }
 
   static DateTime? _findNextFreeSlot({
@@ -154,15 +148,10 @@ class GuardianService {
     //
     // Ieškome 15 minučių žingsniais.
     //
-    var candidate =
-        _roundUpToQuarterHour(now);
+    var candidate = _roundUpToQuarterHour(now);
 
     while (candidate.isBefore(deadline)) {
-      final end = candidate.add(
-        Duration(
-          minutes: requiredMinutes,
-        ),
-      );
+      final end = candidate.add(Duration(minutes: requiredMinutes));
 
       //
       // Užduotis privalo pasibaigti
@@ -176,15 +165,12 @@ class GuardianService {
         start: candidate,
         end: end,
         routine: routine,
-        calendarEvents:
-            calendarEvents,
+        calendarEvents: calendarEvents,
       )) {
         return candidate;
       }
 
-      candidate = candidate.add(
-        const Duration(minutes: 15),
-      );
+      candidate = candidate.add(const Duration(minutes: 15));
     }
 
     return null;
@@ -199,11 +185,7 @@ class GuardianService {
     //
     // Miego laikas.
     //
-    if (!_isInsideAwakeTime(
-      start,
-      end,
-      routine,
-    )) {
+    if (!_isInsideAwakeTime(start, end, routine)) {
       return false;
     }
 
@@ -211,9 +193,7 @@ class GuardianService {
     // Rutinos blokai.
     //
     for (final block in routine.blocks) {
-      if (!block.weekdays.contains(
-        start.weekday,
-      )) {
+      if (!block.weekdays.contains(start.weekday)) {
         continue;
       }
 
@@ -221,28 +201,15 @@ class GuardianService {
         start.year,
         start.month,
         start.day,
-      ).add(
-        Duration(
-          minutes: block.startMinutes,
-        ),
-      );
+      ).add(Duration(minutes: block.startMinutes));
 
       final blockEnd = DateTime(
         start.year,
         start.month,
         start.day,
-      ).add(
-        Duration(
-          minutes: block.endMinutes,
-        ),
-      );
+      ).add(Duration(minutes: block.endMinutes));
 
-      if (_overlaps(
-        start,
-        end,
-        blockStart,
-        blockEnd,
-      )) {
+      if (_overlaps(start, end, blockStart, blockEnd)) {
         return false;
       }
     }
@@ -255,27 +222,15 @@ class GuardianService {
         continue;
       }
 
-      if (event.status ==
-          EventStatus.canceled) {
+      if (event.status == EventStatus.canceled) {
         continue;
       }
 
-      final eventStart =
-          event.startDate;
+      final eventStart = event.startDate;
 
-      final eventEnd =
-          event.endDate;
+      final eventEnd = event.endDate;
 
-      if (eventEnd == null) {
-        continue;
-      }
-
-      if (_overlaps(
-        start,
-        end,
-        eventStart,
-        eventEnd,
-      )) {
+      if (_overlaps(start, end, eventStart, eventEnd)) {
         return false;
       }
     }
@@ -288,51 +243,39 @@ class GuardianService {
     DateTime end,
     UserRoutine routine,
   ) {
-    final wakeUp =
-        routine.wakeUpMinutes;
+    final wakeUp = routine.wakeUpMinutes;
 
-    final sleep =
-        routine.sleepStartMinutes;
+    final sleep = routine.sleepStartMinutes;
 
     //
     // Jei žmogus dar nenustatė miego
     // režimo, Guardian šio apribojimo
     // netaiko.
     //
-    if (wakeUp == null ||
-        sleep == null) {
+    if (wakeUp == null || sleep == null) {
       return true;
     }
 
-    final startMinutes =
-        start.hour * 60 + start.minute;
+    final startDay = DateTime(start.year, start.month, start.day);
 
-    final endMinutes =
-        end.hour * 60 + end.minute;
+    for (final dayOffset in [-1, 0]) {
+      final day = startDay.add(Duration(days: dayOffset));
 
-    //
-    // Paprastas režimas, pvz.
-    // 07:00 -> 23:00.
-    //
-    if (sleep > wakeUp) {
-      return startMinutes >= wakeUp &&
-          endMinutes <= sleep;
+      final awakeStart = day.add(Duration(minutes: wakeUp));
+
+      final awakeEnd = sleep > wakeUp
+          ? day.add(Duration(minutes: sleep))
+          : day.add(const Duration(days: 1)).add(Duration(minutes: sleep));
+
+      final startsInside = !start.isBefore(awakeStart);
+      final endsInside = !end.isAfter(awakeEnd);
+
+      if (startsInside && endsInside) {
+        return true;
+      }
     }
 
-    //
-    // Jei miego laikas pereina per
-    // vidurnaktį, pvz.
-    // 08:00 -> 01:00.
-    //
-    final startAwake =
-        startMinutes >= wakeUp ||
-        startMinutes < sleep;
-
-    final endAwake =
-        endMinutes > wakeUp ||
-        endMinutes <= sleep;
-
-    return startAwake && endAwake;
+    return false;
   }
 
   static bool _overlaps(
@@ -341,15 +284,11 @@ class GuardianService {
     DateTime startB,
     DateTime endB,
   ) {
-    return startA.isBefore(endB) &&
-        endA.isAfter(startB);
+    return startA.isBefore(endB) && endA.isAfter(startB);
   }
 
-  static DateTime _roundUpToQuarterHour(
-    DateTime date,
-  ) {
-    final remainder =
-        date.minute % 15;
+  static DateTime _roundUpToQuarterHour(DateTime date) {
+    final remainder = date.minute % 15;
 
     if (remainder == 0 &&
         date.second == 0 &&
@@ -358,10 +297,7 @@ class GuardianService {
       return date;
     }
 
-    final minutesToAdd =
-        remainder == 0
-            ? 15
-            : 15 - remainder;
+    final minutesToAdd = remainder == 0 ? 15 : 15 - remainder;
 
     return DateTime(
       date.year,
@@ -369,10 +305,6 @@ class GuardianService {
       date.day,
       date.hour,
       date.minute,
-    ).add(
-      Duration(
-        minutes: minutesToAdd,
-      ),
-    );
+    ).add(Duration(minutes: minutesToAdd));
   }
 }
